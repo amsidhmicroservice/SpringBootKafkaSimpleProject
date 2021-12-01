@@ -49,6 +49,7 @@ public class KafkaConsumerConfig {
 
         ConcurrentKafkaListenerContainerFactory<String, PersonRequest> factory =  new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(getConsumerFactory());
+		factory.setRecordFilterStrategy(consumerRecord -> !(consumerRecord.value() instanceof PersonRequest));
         return factory;
     }
 }
