@@ -17,6 +17,7 @@ public class KafkaConsumerServiceImpl implements KafkaConsumerService {
 	@KafkaListener(topics = "spring-topic", groupId = "test-consumer-group")
 	@Override
 	public void consumeKafkaMessage(@Payload ConsumerRecord consumerRecord, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition) {
+		log.info("ConsumerRecord: {}", consumerRecord);
 		log.info("Message {} consumed from partition {}", consumerRecord.value().toString(), partition);
 	}
 	
