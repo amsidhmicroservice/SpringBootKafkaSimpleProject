@@ -1,0 +1,7 @@
+#logging configuration
+logging:
+  level:
+    root: error
+    com:
+      amsidh:
+        mvc: info
