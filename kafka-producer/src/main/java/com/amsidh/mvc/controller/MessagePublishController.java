@@ -27,9 +27,22 @@ public class MessagePublishController {
 		log.info("Sending message {}", name);
 
 
-		ListenableFuture<SendResult<String, Object>> sendResultListenableFuture = kafkaTemplate.send(KAFKA_TOPIC_NAME, "Hello " + name);
-		sendResultListenableFuture.addCallback(result -> log.info("Message published successfully {}", result.getProducerRecord().value().toString()), ex -> log.error("Failed to publish message", ex));
+		ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(KAFKA_TOPIC_NAME, name);
 
+		/*
+		//Using KafkaTemplate
+		ListenableFuture<SendResult<String, Object>> sendResultListenableFuture = kafkaTemplate.send(producerRecord);
+		sendResultListenableFuture.addCallback(result -> log.info("Message published successfully {}", result.getProducerRecord().value().toString()), ex -> log.error("Failed to publish message", ex));
+*/
+		//Use KafkaProducer
+		kafkaProducer.send(producerRecord, (metadata, exception) -> {
+			if (exception != null) {
+				log.error("Failed to publish message", exception);
+			}
+			if (metadata != null) {
+				log.info("Message published successfully {}", name);
+			}
+		});
 		return "Message published successfully";
 	}
 	
@@ -43,8 +56,12 @@ public class MessagePublishController {
 		});
 
 		ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(KAFKA_TOPIC_NAME, personRequest.getUuid(), personRequest);
+		//Using KafkaTemplate
+		ListenableFuture<SendResult<String, Object>> sendResultListenableFuture = kafkaTemplate.send(producerRecord);
+		sendResultListenableFuture.addCallback(result -> log.info("Message published successfully {}", result.getProducerRecord().value().toString()), ex -> log.error("Failed to publish message", ex));
 
-		//ListenableFuture<SendResult<String, Object>> sendResultListenableFuture = kafkaTemplate.send(producerRecord);
+		/*
+		// OR using KafkaProducer
 		kafkaProducer.send(producerRecord, (metadata, exception) -> {
 			if (exception != null) {
 				log.error("Failed to publish message", exception);
@@ -52,13 +69,9 @@ public class MessagePublishController {
 			if (metadata != null) {
 				log.info("Message published successfully {}", personRequest);
 			}
-		});
+		});*/
+
 		return "Message published successfully";
 	}
 
-	/*
-	 * @KafkaListener(topics = KAFKA_TOPIC_NAME, groupId = "test-consumer-group")
-	 * public void consumeMessage(String message) { log.info("Message consumed {}",
-	 * message); }
-	 */
 }
