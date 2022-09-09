@@ -3,10 +3,10 @@ package com.amsidh.mvc.controller;
 import com.amsidh.mvc.model.PersonRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -23,7 +23,11 @@ public class MessagePublishController {
 	@GetMapping("/publish/{name}")
 	public String publishMessage(@PathVariable String name) {
 		log.info("Sending message {}", name);
-		kafkaTemplate.send(KAFKA_TOPIC_NAME, "Hello " + name);
+
+
+		ListenableFuture<SendResult<String, Object>> sendResultListenableFuture = kafkaTemplate.send(KAFKA_TOPIC_NAME, "Hello " + name);
+		sendResultListenableFuture.addCallback(result -> log.info("Message published successfully {}", result.getProducerRecord().value().toString()), ex -> log.error("Failed to publish message", ex));
+
 		return "Message published successfully";
 	}
 	
@@ -35,19 +39,11 @@ public class MessagePublishController {
 				person.setUuid(UUID.randomUUID().toString());
 			}
 		});
-		ListenableFuture<SendResult<String, Object>> sendResultListenableFuture = kafkaTemplate.send(KAFKA_TOPIC_NAME, personRequest.getUuid(), personRequest);
-		sendResultListenableFuture.addCallback(new ListenableFutureCallback() {
 
-			@Override
-			public void onSuccess(Object result) {
-				log.info("Message published successfully {}", result.toString());
-			}
+		ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(KAFKA_TOPIC_NAME, personRequest.getUuid(), personRequest);
 
-			@Override
-			public void onFailure(Throwable ex) {
-				log.error("Failed to publish message", ex);
-			}
-		});
+		ListenableFuture<SendResult<String, Object>> sendResultListenableFuture = kafkaTemplate.send(producerRecord);
+		sendResultListenableFuture.addCallback(result -> log.info("Message published successfully {}", result.getProducerRecord().value().toString()), ex -> log.error("Failed to publish message", ex));
 		return "Message published successfully";
 	}
 

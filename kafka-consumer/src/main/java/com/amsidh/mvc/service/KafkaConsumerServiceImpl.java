@@ -1,5 +1,6 @@
 package com.amsidh.mvc.service;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -14,8 +15,8 @@ public class KafkaConsumerServiceImpl implements KafkaConsumerService {
 
 	@KafkaListener(topics = "spring-topic", groupId = "spring-topic-group")
 	@Override
-	public void consumeKafkaMessage(@Payload Object object, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition) {
-		log.info("Message {} consumed from partition {}", object.toString(), partition);
+	public void consumeKafkaMessage(@Payload ConsumerRecord<String, Object> kafkaMessage, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition) {
+		log.info("Message {} consumed from partition {}", kafkaMessage.value().toString(), partition);
 	}
 	
 }

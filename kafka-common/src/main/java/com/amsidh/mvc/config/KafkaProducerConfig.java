@@ -27,6 +27,7 @@ public class KafkaProducerConfig {
 		log.debug("Creating bean of ProducerFactory!!!!");
 		Map<String, Object> kafkaProducerConfigMap = new HashMap<>();
 		kafkaProducerConfigMap.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServerConfig);
+		kafkaProducerConfigMap.put(ProducerConfig.ACKS_CONFIG, "all");
 
 		kafkaProducerConfigMap.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		kafkaProducerConfigMap.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
@@ -35,9 +36,9 @@ public class KafkaProducerConfig {
 	}
 
 	@Bean
-	public KafkaTemplate<String, Object> getKafkaTemplate() {
+	public KafkaTemplate getKafkaTemplate() {
 		log.debug("Creating bean of KafkaTemplate!!!!");
-		KafkaTemplate<String, Object> kafkaTemplate = new KafkaTemplate<String, Object>(getProducerFactory());
+		KafkaTemplate kafkaTemplate = new KafkaTemplate(getProducerFactory());
 		return kafkaTemplate;
 	}
 }
