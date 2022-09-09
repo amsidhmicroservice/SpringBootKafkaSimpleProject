@@ -8,6 +8,7 @@ import lombok.*;
 @Builder
 @ToString
 public class PersonRequest {
+  private String uuid;
   private Integer personId;
   private String personName;
   private String address;

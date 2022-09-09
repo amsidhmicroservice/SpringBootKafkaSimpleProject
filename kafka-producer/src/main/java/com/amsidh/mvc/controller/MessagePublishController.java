@@ -1,16 +1,16 @@
 package com.amsidh.mvc.controller;
 
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.amsidh.mvc.model.PersonRequest;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -30,7 +30,24 @@ public class MessagePublishController {
 	@PostMapping("/publish")
 	public String publishMessage( @RequestBody PersonRequest personRequest) {
 		log.info("Sending person {}", personRequest);
-        kafkaTemplate.send(KAFKA_TOPIC_NAME, personRequest);
+		Optional.ofNullable(personRequest).ifPresent(person -> {
+			if (null == person.getUuid()) {
+				person.setUuid(UUID.randomUUID().toString());
+			}
+		});
+		ListenableFuture<SendResult<String, Object>> sendResultListenableFuture = kafkaTemplate.send(KAFKA_TOPIC_NAME, personRequest.getUuid(), personRequest);
+		sendResultListenableFuture.addCallback(new ListenableFutureCallback() {
+
+			@Override
+			public void onSuccess(Object result) {
+				log.info("Message published successfully {}", result.toString());
+			}
+
+			@Override
+			public void onFailure(Throwable ex) {
+				log.error("Failed to publish message", ex);
+			}
+		});
 		return "Message published successfully";
 	}
 

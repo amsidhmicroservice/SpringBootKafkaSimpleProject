@@ -5,5 +5,5 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 
 public interface KafkaConsumerService {
-   void consumeKafkaMessage(@Payload String message, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition);
+   void consumeKafkaMessage(@Payload Object object, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition);
 }

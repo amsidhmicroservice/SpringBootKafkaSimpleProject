@@ -12,10 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class KafkaConsumerServiceImpl implements KafkaConsumerService {
 
-	@KafkaListener(topics = "spring-topic", groupId = "test-consumer-group")
+	@KafkaListener(topics = "spring-topic", groupId = "spring-topic-group")
 	@Override
-	public void consumeKafkaMessage(@Payload String message, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition) {
-		log.info("Message {} consumed from partition {}", message, partition);
+	public void consumeKafkaMessage(@Payload Object object, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition) {
+		log.info("Message {} consumed from partition {}", object.toString(), partition);
 	}
 	
 }
